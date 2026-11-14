@@ -124,6 +124,24 @@ def build_tasks(rows: list[dict], estimates: dict[str, int],
         tasks.append(Task(name, subject, deadline, priority, minutes))
     return tasks, issues
 
+def tasks_from_assignments(assignments, start: date) -> tuple[list[Task], list[PlanIssue]]:
+    """Build planner tasks from tracker assignments (objects like assignments.Assignment)."""
+    tasks, issues = [], []
+    for a in assignments:
+        if a.completed:
+            continue
+        if a.due_date < start:
+            issues.append(PlanIssue("overdue", a.task,
+                                    f"'{a.task}' ({a.subject}) was due {a.due_date.isoformat()}."))
+            continue
+        if not a.estimated_minutes:
+            issues.append(PlanIssue("missing_estimate", a.task,
+                                    f"'{a.task}' ({a.subject}) has no estimate. Skipped."))
+            continue
+        tasks.append(Task(a.task, a.subject, a.due_date, a.priority.name.lower(),
+                          a.estimated_minutes))
+    return tasks, issues
+
 def build_days(start: date, cfg: PlannerConfig) -> list[date]:
     days = []
     for offset in range(cfg.planning_days):
@@ -194,6 +212,19 @@ def generate_study_plan(assignments_path: str | Path,
     sessions, schedule_issues = schedule_tasks(tasks, build_days(start, cfg), cfg)
 
     plan = StudyPlan(sessions, issues + task_issues + schedule_issues)
+    if output_path:
+        write_schedule(plan.sessions, output_path)
+    return plan
+
+def generate_plan_from_assignments(assignments, output_path: str | Path | None = None,
+                                   config: PlannerConfig | None = None,
+                                   start_date: date | None = None) -> StudyPlan:
+    """Plan straight from tracker assignments (no CSV files involved)."""
+    cfg = config or PlannerConfig()
+    start = start_date or date.today()
+    tasks, issues = tasks_from_assignments(assignments, start)
+    sessions, schedule_issues = schedule_tasks(tasks, build_days(start, cfg), cfg)
+    plan = StudyPlan(sessions, issues + schedule_issues)
     if output_path:
         write_schedule(plan.sessions, output_path)
     return plan
