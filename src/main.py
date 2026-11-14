@@ -5,6 +5,7 @@ from assignments import AssignmentTracker, format_table, AssignmentNotFound
 from reports import generate_study_report, ReportDataError
 from study_planner import generate_study_plan, PlannerConfig
 from document_processor import process_document, process_folder, DocumentError
+from session_log import log_session
 
 def print_global_menu():
     print("\n" + "=" * 50)
@@ -15,7 +16,8 @@ def print_global_menu():
     print("3. 📈 Generate Study Performance Reports")
     print("4. 🗓️  Generate Automated Study Plan")
     print("5. 🔍 Run Document Analytics Processor")
-    print("6. ❌ Exit Toolkit")
+    print("6. ✍️  Log a Study Session")
+    print("7. ❌ Exit Toolkit")
     print("-" * 50)
 
 def print_assignment_menu():
@@ -289,12 +291,35 @@ def handle_document_processor():
     except Exception as e:
         print(f"❌ An unexpected analytical document system crash occurred: {e}")
 
+def handle_session_logger():
+    """Append a study session to the CSV the report feature reads."""
+    print("\n--- ✍️  Log a Study Session ---")
+    subject = input("Subject: ").strip()
+    minutes = input("Minutes studied: ").strip()
+    day = input("Date (YYYY-MM-DD, leave blank for today): ").strip()
+
+    try:
+        row = log_session(
+            "data/study_log.csv", subject, minutes, day or None,
+            plan_path="reports/study_plan.csv",
+        )
+    except ValueError as e:
+        print(f"❌ Input Error: {e}")
+        return
+    except OSError as e:
+        print(f"❌ Could not write the study log: {e}")
+        return
+    print(
+        f"✅ Logged {row['duration_minutes']} min of {row['subject']} on {row['date']} "
+        f"(planned: {row['planned_minutes']} min)."
+    )
+
 def main():
     tracker = AssignmentTracker()
 
     while True:
         print_global_menu()
-        global_choice = input("Select a toolkit option (1-6): ").strip()
+        global_choice = input("Select a toolkit option (1-7): ").strip()
 
         if global_choice == "1":
             handle_assignment_tracker(tracker)
@@ -307,10 +332,12 @@ def main():
         elif global_choice == "5":
             handle_document_processor()
         elif global_choice == "6":
+            handle_session_logger()
+        elif global_choice =="7":
             print("Exiting Toolkit. Keep crushing your goals! 🚀")
             sys.exit(0)
         else:
-            print("❌ Invalid option. Please choose 1, 2, 3, 4, 5 or 6.")
+            print("❌ Invalid option. Please choose a number between 1 and 7.")
 
 if __name__ == "__main__":
     main()
