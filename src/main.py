@@ -1,9 +1,9 @@
 import sys
 from pathlib import Path
 from file_organiser import SmartFileOrganiser, Move
-from assignments import AssignmentTracker, format_table, AssignmentNotFound
+from assignments import AssignmentTracker, format_table, AssignmentNotFound, parse_estimate_hours
 from reports import generate_study_report, ReportDataError
-from study_planner import generate_study_plan, PlannerConfig
+from study_planner import generate_study_plan, generate_plan_from_assignments, PlannerConfig
 from document_processor import process_document, process_folder, DocumentError
 from session_log import log_session
 
@@ -28,7 +28,8 @@ def print_assignment_menu():
     print("2. Filter assignments (by Subject or Priority)")
     print("3. Add a new assignment")
     print("4. Mark an assignment as completed")
-    print("5. Return to Main Menu")
+    print("5. Set study-time estimate for an assignment")
+    print("6. Return to Main Menu")
     print("-" * 45)
 
 def print_file_menu():
@@ -56,7 +57,7 @@ def handle_assignment_tracker(tracker: AssignmentTracker):
     """Brings your assignment tracking loop right into the toolkit router"""
     while True:
         print_assignment_menu()
-        choice = input("Select an option (1-5): ").strip()
+        choice = input("Select an option (1-6): ").strip()
 
         if choice == "1":
             assignments = tracker.list_assignments(include_completed=False)
@@ -88,12 +89,14 @@ def handle_assignment_tracker(tracker: AssignmentTracker):
             task = input("Task/Assignment Name: ").strip()
             due_date = input("Due Date (YYYY-MM-DD): ").strip()
             priority = input("Priority [Low / Medium / High] (Default: Medium): ").strip()
+            estimate_input = input("Estimated study hours (optional, e.g. 2.5): ")
 
             if not priority:
                 priority = "Medium"
 
             try:
-                tracker.add(subject=subject, task=task, due=due_date, priority=priority)
+                tracker.add(subject=subject, task=task, due=due_date, priority=priority,
+                            estimated_hours=parse_estimate_hours(estimate_input))
                 print(f"✅ Successfully added: [{subject}] {task}")
             except ValueError as e:
                 print(f"❌ Input Error: {e}")
@@ -111,10 +114,30 @@ def handle_assignment_tracker(tracker: AssignmentTracker):
                 print(f"❌ Error: Assignment ID {assignment_id} not found.")
 
         elif choice == "5":
+            assignments = tracker.list_assignments(include_completed=False)
+            print("\n" + format_table(assignments))
+            try:
+                assignment_id = int(input("\nEnter the ID of the assignment: ").strip())
+            except ValueError:
+                print("❌ Error: Please enter a valid numeric ID.")
+                continue
+            try:
+                minutes = parse_estimate_hours(input("Estimated study hours (e.g. 2.5): "))
+                if minutes is None:
+                    raise ValueError("Please enter a number of hours.")
+                tracker.set_estimate(assignment_id, minutes)
+            except ValueError as e:
+                print(f"❌ {e}")
+            except AssignmentNotFound:
+                print(f"❌ Error: Assignment ID {assignment_id} not found.")
+            else:
+                print(f"✅ Estimate saved for assignment ID {assignment_id}.")
+
+        elif choice == "6":
             print("Returning to global toolkit dashboard...")
             break
-        else: 
-            print("❌ Invalid option. Please choose a number between 1 and 5.")
+        else:
+            print("❌ Invalid option. Please choose a number between 1 and 6.")
 
 def handle_file_organiser():
     organiser = SmartFileOrganiser()
@@ -212,26 +235,37 @@ def handle_study_reporter():
     except Exception as e:
         print(f"❌ An unexpected analytics system crash occurred: {e}")
 
-def handle_study_planner():
+def handle_study_planner(tracker):
     """Automated Back-to-Back Calendar Logic Router"""
     print("\n--- 🗓️  Automated Study Plan Generator ---")
+    print("Plan from:")
+    print("1. Assignment Tracker (recommended)")
+    print("2. CSV files")
+    source = input("Choose a source (1-2, leave blank for 1): ").strip() or "1"
+    if source not in ("1", "2"):
+        print("❌ Invalid choice.")
+        return
 
-    assign_input = input("Enter path to assignments CSV (Leave blank for data/assignments.csv): ").strip()
-    assign_path = Path(assign_input) if assign_input else Path("data/assignments.csv")
+    if source == "2":
+        assign_input = input("Enter path to assignments CSV (Leave blank for data/assignments.csv): ").strip()
+        assign_path = Path(assign_input) if assign_input else Path("data/assignments.csv")
 
-    estim_input = input("Enter path to task estimates CSV (Leave blank for data/estimates.csv): ").strip()
-    estim_path = Path(estim_input) if estim_input else Path("data/estimates.csv")
+        estim_input = input("Enter path to task estimates CSV (Leave blank for data/estimates.csv): ").strip()
+        estim_path = Path(estim_input) if estim_input else Path("data/estimates.csv")
 
     out_input = input("Enter path to save the generated plan CSV (Leave blank for reports/study_plan.csv): ").strip()
     out_path = Path(out_input) if out_input else Path("reports/study_plan.csv")
 
     try:
         print("\nLoading schedules, resolving hourly capacities and building calendar targets...")
-        plan = generate_study_plan(
-            assignments_path=assign_path,
-            requirements_path=estim_path,
-            output_path=out_path
-        )
+        if source == "1":
+            plan = generate_plan_from_assignments(tracker.list_assignments(), output_path=out_path)
+        else:
+            plan = generate_study_plan(
+                assignments_path=assign_path,
+                requirements_path=estim_path,
+                output_path=out_path
+            )
         print(f"✅ Study plan successfully compiled and saved to: {out_path}")
         print(f"📊 Scheduled total of {len(plan.sessions)} sessions.")
 

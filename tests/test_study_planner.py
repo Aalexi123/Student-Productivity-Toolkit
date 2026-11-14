@@ -8,7 +8,9 @@ from src.study_planner import (
     build_days,
     build_tasks,
     generate_study_plan,
+    generate_plan_from_assignments,
 )
+from src.assignments import AssignmentTracker
 
 START = date(2026, 10, 26)
 
@@ -52,3 +54,18 @@ def test_generate_study_plan_end_to_end(tmp_path):
 def test_planner_config_rejects_bad_values():
     with pytest.raises(ValueError):
         PlannerConfig(daily_capacity_min=0)
+
+def test_plan_from_tracker_assignments(tmp_path):
+    t = AssignmentTracker(tmp_path / "t.db")
+    t.add("History", "Essay", "2026-11-10", "high", estimated_minutes=120)
+    t.add("Math", "Problem set", "2026-11-10", "low")             # no estimate
+    done = t.add("Physics", "Lab", "2026-11-10", estimated_minutes=60)
+    t.complete(done.id)                                           # completed: ignored
+    t.add("Art", "Sketch", "2026-10-01", estimated_minutes=30)    # overdue
+
+    plan = generate_plan_from_assignments(
+        t.list_assignments(), tmp_path / "plan.csv", start_date=date(2026, 11, 1)
+    )
+    assert sum(s.minutes for s in plan.sessions) == 120
+    assert sorted(i.kind for i in plan.issues) == ["missing_estimate", "overdue"]
+    assert (tmp_path / "plan.csv").exists()
