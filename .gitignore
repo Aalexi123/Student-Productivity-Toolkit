@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing, coverage, linters
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Build / distribution
+build/
+dist/
+*.egg-info/
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+credentials.json
+token.json
+*.pem
+*.key
+
+# Local databases and logs
+*.db
+*.sqlite
+*.sqlite3
+*.log
+.organiser_log.json
+
+# Generated reports
+reports/*
+
+# Personal data (keep only example files)
+data/*
+
+# Demo folder that the organiser rearranges
+src/sample_downloads/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
