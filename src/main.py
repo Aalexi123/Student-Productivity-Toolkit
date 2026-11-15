@@ -6,6 +6,13 @@ from reports import generate_study_report, ReportDataError
 from study_planner import generate_study_plan, generate_plan_from_assignments, PlannerConfig
 from document_processor import process_document, process_folder, DocumentError
 from session_log import log_session
+from paths import (
+    DEFAULT_ASSIGNMENTS_CSV,
+    DEFAULT_ESTIMATES_CSV,
+    DEFAULT_LOG,
+    DEFAULT_PLAN,
+    REPORTS_DIR,
+)
 
 def print_global_menu():
     print("\n" + "=" * 50)
@@ -223,11 +230,11 @@ def handle_study_reporter():
     """Encapsulated Study Analytics Trigger Feature"""
     print("\n--- 📈 Study Performance Report Engine ---")
     log_input = input("Enter path to your study_log.csv (Leave blank for data/study_log.csv): ").strip()
-    csv_path = Path(log_input) if log_input else Path("data/study_log.csv")
+    csv_path = Path(log_input) if log_input else DEFAULT_LOG
 
     try:
         print("\nCrunching data models, filtering bad rows and plotting charts...")
-        generate_study_report(csv_path=csv_path, output_dir="reports")
+        generate_study_report(csv_path=csv_path, output_dir=REPORTS_DIR)
     except FileNotFoundError:
         print(f"❌ Error: Target log spreadsheet could not be found at: {csv_path}")
     except ReportDataError as rde:
@@ -247,14 +254,14 @@ def handle_study_planner(tracker):
         return
 
     if source == "2":
-        assign_input = input("Enter path to assignments CSV (Leave blank for data/assignments.csv): ").strip()
-        assign_path = Path(assign_input) if assign_input else Path("data/assignments.csv")
+        assign_input = input("Enter path to assignments CSV (Leave blank for DEFAULT_ASSIGNMENTS_CSV): ").strip()
+        assign_path = Path(assign_input) if assign_input else DEFAULT_ASSIGNMENTS_CSV
 
-        estim_input = input("Enter path to task estimates CSV (Leave blank for data/estimates.csv): ").strip()
-        estim_path = Path(estim_input) if estim_input else Path("data/estimates.csv")
+        estim_input = input("Enter path to task estimates CSV (Leave blank for DEFAULT_ESTIMATES_CSV): ").strip()
+        estim_path = Path(estim_input) if estim_input else DEFAULT_ESTIMATES_CSV
 
-    out_input = input("Enter path to save the generated plan CSV (Leave blank for reports/study_plan.csv): ").strip()
-    out_path = Path(out_input) if out_input else Path("reports/study_plan.csv")
+    out_input = input("Enter path to save the generated plan CSV (Leave blank for DEFAULT_PLAN): ").strip()
+    out_path = Path(out_input) if out_input else DEFAULT_PLAN
 
     try:
         print("\nLoading schedules, resolving hourly capacities and building calendar targets...")
@@ -299,8 +306,8 @@ def handle_document_processor():
 
     target_path = Path(target_input).expanduser().resolve()
 
-    out_input = input("Enter output directory for text reports (Leave blank for reports): ").strip()
-    out_dir = Path(out_input) if out_input else Path("reports")
+    out_input = input("Enter output directory for text reports (Leave blank for REPORTS_DIR): ").strip()
+    out_dir = Path(out_input) if out_input else REPORTS_DIR
 
     mask_input = input("Enable best-effort privacy masking? (y/n, Default: y): ").strip().lower()
     mask_privacy = mask_input != "n"
@@ -334,8 +341,8 @@ def handle_session_logger():
 
     try:
         row = log_session(
-            "data/study_log.csv", subject, minutes, day or None,
-            plan_path="reports/study_plan.csv",
+            DEFAULT_LOG, subject, minutes, day or None,
+            plan_path=DEFAULT_PLAN,
         )
     except ValueError as e:
         print(f"❌ Input Error: {e}")
@@ -348,7 +355,7 @@ def handle_session_logger():
         f"(planned: {row['planned_minutes']} min)."
     )
 
-def main():
+def run_menu() -> int:
     tracker = AssignmentTracker()
 
     while True:
@@ -369,9 +376,17 @@ def main():
             handle_session_logger()
         elif global_choice =="7":
             print("Exiting Toolkit. Keep crushing your goals! 🚀")
-            sys.exit(0)
+            return 0
         else:
             print("❌ Invalid option. Please choose a number between 1 and 7.")
 
+def main(argv: list[str] | None = None) -> int:
+    """No arguments: interactive menu. With arguments: run one command (see cli.py)."""
+    argv = sys.argv[1:] if argv is None else argv
+    if not argv:
+        return run_menu()
+    from cli import run
+    return run(argv)
+
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
