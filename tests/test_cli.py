@@ -161,3 +161,44 @@ def test_process_a_folder_reports_failures_in_the_exit_code(tmp_path, capsys):
     assert code == 1
     assert "bad.pdf" in capsys.readouterr().err
     assert list((tmp_path / "o").glob("good_txt_report.txt"))
+
+# ---------- remind ----------
+def make_reminder_db(tmp_path):
+    db = tmp_path / "t.db"
+    tracker = AssignmentTracker(db)
+    tracker.add("Physics", "Lab report", iso(-2), "high")
+    tracker.add("Math", "HW", iso(1))
+    tracker.add("Art", "Sketch", iso(30))
+    return db
+
+
+def test_remind_lists_overdue_and_upcoming(tmp_path, capsys):
+    db = make_reminder_db(tmp_path)
+    assert main(["remind", "--db", str(db), "--days", "3"]) == 0
+    out = capsys.readouterr().out
+    assert "OVERDUE (1)" in out and "Lab report" in out and "HW" in out
+    assert "Sketch" not in out
+
+
+def test_remind_with_a_missing_database_fails_cleanly(tmp_path, capsys):
+    assert main(["remind", "--db", str(tmp_path / "missing.db")]) == 1
+    assert "not found" in capsys.readouterr().err
+
+
+def test_remind_notify_sends_a_notification(tmp_path, monkeypatch):
+    import sys
+    import types
+
+    calls = []
+    fake = types.SimpleNamespace(notification=types.SimpleNamespace(notify=lambda **kw: calls.append(kw)))
+    monkeypatch.setitem(sys.modules, "plyer", fake)
+    assert main(["remind", "--db", str(make_reminder_db(tmp_path)), "--notify"]) == 0
+    assert calls and "overdue" in calls[0]["message"]
+
+
+def test_remind_notify_without_plyer_fails_cleanly(tmp_path, monkeypatch, capsys):
+    import sys
+
+    monkeypatch.setitem(sys.modules, "plyer", None)
+    assert main(["remind", "--db", str(make_reminder_db(tmp_path)), "--notify"]) == 1
+    assert "plyer" in capsys.readouterr().err

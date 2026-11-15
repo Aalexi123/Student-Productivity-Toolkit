@@ -17,6 +17,41 @@ pip install -r requirements.txt
 python scripts/make_sample_data.py
 python src/main.py
 ```
+## Command line
+
+Run with no arguments for the interactive menu, or run one feature directly:
+
+| Command | What it does |
+|---|---|
+| `python src/main.py plan --days 14 --no-weekends` | Study plan from the tracker (`--source csv` uses CSV files) |
+| `python src/main.py report --since 30` | Planned vs actual report for the last 30 days |
+| `python src/main.py organise <folder>` | Preview only. Add `--apply` to move files, or `--undo` to reverse |
+| `python src/main.py process <file-or-folder>` | Analyse documents (`--no-mask` turns masking off) |
+| `python src/main.py log Physics 45` | Record a study session |
+| `python src/main.py remind --days 3` | List overdue and due-soon assignments |
+
+Add `--help` after any command for its options. Exit codes: 0 success, 1 failure, 2 bad usage.
+
+### Scheduling daily reminders
+
+Optional desktop notifications need `pip install plyer`.
+
+**Windows (Task Scheduler):** replace the paths with your own.
+
+```powershell
+schtasks /Create /SC DAILY /ST 08:00 /TN "StudyToolkitReminders" /TR "C:\path\to\project\.venv\Scripts\python.exe C:\path\to\project\src\main.py remind --days 3 --notify"
+schtasks /Run /TN "StudyToolkitReminders"
+```
+
+The second command runs it once now so you can test it. If your path contains spaces, wrap each path in escaped quotes (`\"...\"`). Remove the task later with `schtasks /Delete /TN "StudyToolkitReminders" /F`.
+
+**macOS / Linux (cron):** run `crontab -e` and add:
+
+```cron
+0 8 * * * /path/to/project/.venv/bin/python /path/to/project/src/main.py remind --days 3 >> ~/study-reminders.log 2>&1
+```
+
+Cron usually can't show desktop notifications, so this writes the reminders to a log file.
 
 ## Features
 
@@ -81,7 +116,10 @@ student-productivity-toolkit/
 │   ├── study_planner.py
 │   ├── document_processor.py
 │   ├── reports.py
-│   └── session_log.py
+│   ├── session_log.py
+│   ├── cli.py
+│   ├── paths.py
+│   └── reminders.py
 ├── scripts/
 │   └── make_sample_data.py
 ├── tests/
@@ -104,7 +142,6 @@ student-productivity-toolkit/
 
 - Masking is regex-based and best effort. It does not catch names, addresses or national ID numbers.
 - Scanned PDFs have no text layer and are not supported (no OCR yet).
-- The interface is menu-only; there are no command-line flags for scheduling.
 - Reports only count days with a logged session, so planned time on days you didn’t study isn’t counted yet.
 
 ## Testing
@@ -118,8 +155,8 @@ python -m pytest
 
 - [x] Study-session logger feeding the reports
 - [x] Tracker → planner bridge (one source of truth for assignments)
-- [ ] CLI subcommands (`plan`, `report`, `organise --apply`) for cron / Task Scheduler
-- [ ] Deadline reminders
+- [x] CLI subcommands (`plan`, `report`, `organise --apply`) for cron / Task Scheduler
+- [x] Deadline reminders
 - [ ] OCR for scanned PDFs
 
 ## Why I built this

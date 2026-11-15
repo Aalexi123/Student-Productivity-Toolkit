@@ -151,6 +151,17 @@ def _cmd_log(args: argparse.Namespace) -> int:
     )
     return 0
 
+def _cmd_remind(args: argparse.Namespace) -> int:
+    from reminders import build_reminder, format_reminder, notification_text, notify
+
+    tracker = _open_tracker(args.db)
+    summary = build_reminder(tracker.list_assignments(), days=args.days)
+    print(format_reminder(summary))
+    if args.notify:
+        text = notification_text(summary)
+        if text:  # stay quiet when there is nothing to remind about
+            notify("Study reminders", text)
+    return 0
 
 # ---------- parser ----------
 def _add_db(parser: argparse.ArgumentParser) -> None:
@@ -220,6 +231,16 @@ def build_parser() -> argparse.ArgumentParser:
     log.add_argument("--plan", type=Path, default=DEFAULT_PLAN,
                      help="plan CSV used to fill in planned minutes (default: %(default)s)")
     log.set_defaults(handler=_cmd_log)
+
+    remind = sub.add_parser("remind", help="list overdue and soon-due assignments",
+                            description="Print overdue and upcoming assignments. "
+                                        "Designed to be scheduled to run daily.")
+    _add_db(remind)
+    remind.add_argument("--days", type=_non_negative_int, default=3,
+                        help="include assignments due within this many days (default: %(default)s)")
+    remind.add_argument("--notify", action="store_true",
+                        help="also show a desktop notification (needs: pip install plyer)")
+    remind.set_defaults(handler=_cmd_remind)
 
     return parser
 
