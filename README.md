@@ -148,8 +148,8 @@ student-productivity-toolkit/
 - Masking is regex-based and best effort. It does not catch names, addresses or national ID numbers.
 - Scanned PDFs have no text layer and are not supported (no OCR yet).
 - Reports only count days with a logged session, so planned time on days you didn’t study isn’t counted yet.
-- Assignments need a study-time estimate before the planner can schedule them (menu: Assignment Tracker, option 5)
-- Desktop notifications use the optional plyer package and depend on your operating system.
+- Assignments need a study-time estimate before the planner can schedule them (menu: Assignment Tracker, option 5).
+- Desktop notifications use the optional `plyer` package and depend on your operating system.
 
 ## Testing
 
