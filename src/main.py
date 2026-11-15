@@ -103,7 +103,7 @@ def handle_assignment_tracker(tracker: AssignmentTracker):
 
             try:
                 tracker.add(subject=subject, task=task, due=due_date, priority=priority,
-                            estimated_hours=parse_estimate_hours(estimate_input))
+                            estimated_minutes=parse_estimate_hours(estimate_input))
                 print(f"✅ Successfully added: [{subject}] {task}")
             except ValueError as e:
                 print(f"❌ Input Error: {e}")
@@ -254,13 +254,13 @@ def handle_study_planner(tracker):
         return
 
     if source == "2":
-        assign_input = input("Enter path to assignments CSV (Leave blank for DEFAULT_ASSIGNMENTS_CSV): ").strip()
+        assign_input = input("Enter path to assignments CSV (Leave blank for data/assignments.csv): ").strip()
         assign_path = Path(assign_input) if assign_input else DEFAULT_ASSIGNMENTS_CSV
 
-        estim_input = input("Enter path to task estimates CSV (Leave blank for DEFAULT_ESTIMATES_CSV): ").strip()
+        estim_input = input("Enter path to task estimates CSV (Leave blank for data/estimates.csv): ").strip()
         estim_path = Path(estim_input) if estim_input else DEFAULT_ESTIMATES_CSV
 
-    out_input = input("Enter path to save the generated plan CSV (Leave blank for DEFAULT_PLAN): ").strip()
+    out_input = input("Enter path to save the generated plan CSV (Leave blank for reports/study_plan.csv): ").strip()
     out_path = Path(out_input) if out_input else DEFAULT_PLAN
 
     try:
@@ -306,7 +306,7 @@ def handle_document_processor():
 
     target_path = Path(target_input).expanduser().resolve()
 
-    out_input = input("Enter output directory for text reports (Leave blank for REPORTS_DIR): ").strip()
+    out_input = input("Enter output directory for text reports (Leave blank for reports): ").strip()
     out_dir = Path(out_input) if out_input else REPORTS_DIR
 
     mask_input = input("Enable best-effort privacy masking? (y/n, Default: y): ").strip().lower()
@@ -369,7 +369,7 @@ def run_menu() -> int:
         elif global_choice == "3":
             handle_study_reporter()
         elif global_choice == "4":
-            handle_study_planner()
+            handle_study_planner(tracker)
         elif global_choice == "5":
             handle_document_processor()
         elif global_choice == "6":

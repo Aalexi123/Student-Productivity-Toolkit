@@ -17,6 +17,7 @@ pip install -r requirements.txt
 python scripts/make_sample_data.py
 python src/main.py
 ```
+
 ## Command line
 
 Run with no arguments for the interactive menu, or run one feature directly:
@@ -62,6 +63,7 @@ Cron usually can't show desktop notifications, so this writes the reminders to a
 | **Study Planner** | Turns deadlines and estimated hours into a daily schedule with a configurable daily capacity. High-priority tasks are scheduled earlier. Warns about overdue tasks, missing estimates and plans that can't fit. Exports CSV. Plans straight from the tracker (or CSV files). |
 | **Document Processor** | Extracts text from TXT, MD, PDF and DOCX; summarises CSVs with pandas. Reports word count, reading time and top terms. Best-effort masking of emails, phone numbers and secrets, with redaction counts in each report. Single file or whole folder. |
 | **Productivity Reports** | Planned vs actual study time by subject and week, with text and Matplotlib chart output. Log sessions from the menu. |
+| **Deadline Reminders** | The \remind` command lists overdue and due-soon assignments. Schedule it daily, with optional desktop notifications. |
 
 ## Data formats
 
@@ -109,6 +111,9 @@ print(process_document(Path("notes.pdf"), Path("reports")))
 
 ```text
 student-productivity-toolkit/
+├── .github/
+│   └── workflows/
+│       └── tests.yml
 ├── src/
 │   ├── main.py
 │   ├── file_organiser.py
@@ -143,6 +148,8 @@ student-productivity-toolkit/
 - Masking is regex-based and best effort. It does not catch names, addresses or national ID numbers.
 - Scanned PDFs have no text layer and are not supported (no OCR yet).
 - Reports only count days with a logged session, so planned time on days you didn’t study isn’t counted yet.
+- Assignments need a study-time estimate before the planner can schedule them (menu: Assignment Tracker, option 5)
+- Desktop notifications use the optional plyer package and depend on your operating system.
 
 ## Testing
 
@@ -157,6 +164,7 @@ python -m pytest
 - [x] Tracker → planner bridge (one source of truth for assignments)
 - [x] CLI subcommands (`plan`, `report`, `organise --apply`) for cron / Task Scheduler
 - [x] Deadline reminders
+- [ ] OCR for scanned PDFs
 
 ## Why I built this
 
