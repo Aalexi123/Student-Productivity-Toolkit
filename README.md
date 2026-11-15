@@ -157,7 +157,6 @@ python -m pytest
 - [x] Tracker → planner bridge (one source of truth for assignments)
 - [x] CLI subcommands (`plan`, `report`, `organise --apply`) for cron / Task Scheduler
 - [x] Deadline reminders
-- [ ] OCR for scanned PDFs
 
 ## Why I built this
 
