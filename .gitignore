@@ -55,3 +55,8 @@ src/sample_downloads/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# .exe
+build/
+dist/
+*.spec

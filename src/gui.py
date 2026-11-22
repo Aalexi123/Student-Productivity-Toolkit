@@ -24,6 +24,7 @@ from paths import (
     DEFAULT_LOG,
     DEFAULT_PLAN,
     REPORTS_DIR,
+    resource_path,
 )
 from reminders import NotificationUnavailable, build_reminder, notification_text, notify
 from reports import ReportDataError, generate_study_report
@@ -819,6 +820,7 @@ class ToolkitApp(ctk.CTk):
         self.configure(fg_color=BG)
         self.tracker = tracker or AssignmentTracker()
         self.title("Student Productivity Toolkit")
+        self.iconbitmap(resource_path("assets/logo.ico"))
         self.geometry("1120x740")
         self.minsize(980, 640)
         self.grid_columnconfigure(2, weight=1)
@@ -873,3 +875,6 @@ def run_gui() -> int:
     ctk.set_appearance_mode("System")
     ToolkitApp().mainloop()
     return 0
+
+if __name__ == "__main__":
+    run_gui()
