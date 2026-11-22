@@ -163,6 +163,17 @@ def _cmd_remind(args: argparse.Namespace) -> int:
             notify("Study reminders", text)
     return 0
 
+def _cmd_gui(args: argparse.Namespace) -> int:
+    try:
+        from gui import run_gui
+    except ImportError as e:
+        if "customtkinter" in str(e) or "tkinter" in str(e):
+            print("The GUI needs customtkinter (and Tk). Install it with: pip install customtkinter",
+                  file=sys.stderr)
+            return 1
+        raise
+    return run_gui()
+
 # ---------- parser ----------
 def _add_db(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--db", type=Path, default=DEFAULT_DB,
@@ -241,6 +252,10 @@ def build_parser() -> argparse.ArgumentParser:
     remind.add_argument("--notify", action="store_true",
                         help="also show a desktop notification (needs: pip install plyer)")
     remind.set_defaults(handler=_cmd_remind)
+
+    gui = sub.add_parser("gui", help="open the graphical interface",
+                         description="Open the customtkinter graphical interface.")
+    gui.set_defaults(handler=_cmd_gui)
 
     return parser
 
