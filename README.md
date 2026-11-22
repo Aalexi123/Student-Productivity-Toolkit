@@ -18,6 +18,17 @@ python scripts/make_sample_data.py
 python src/main.py
 ```
 
+## Graphical interface
+
+A customtkinter window covers every feature: dashboard with reminders, assignments, planner, session logger, reports with charts, file organiser (tick the files you want moved) and document analytics. It supports light and dark mode.
+
+```bash
+pip install -r requirements.txt   # includes customtkinter
+python src/main.py gui
+```
+
+The GUI calls the same functions as the menu and command line, so all three always behave the same.
+
 ## Command line
 
 Run with no arguments for the interactive menu, or run one feature directly:
@@ -30,6 +41,7 @@ Run with no arguments for the interactive menu, or run one feature directly:
 | `python src/main.py process <file-or-folder>` | Analyse documents (`--no-mask` turns masking off) |
 | `python src/main.py log Physics 45` | Record a study session |
 | `python src/main.py remind --days 3` | List overdue and due-soon assignments |
+| `python src/main.py gui` | Open the graphical interface |
 
 Add `--help` after any command for its options. Exit codes: 0 success, 1 failure, 2 bad usage.
 
@@ -123,6 +135,8 @@ student-productivity-toolkit/
 │   ├── reports.py
 │   ├── session_log.py
 │   ├── cli.py
+│   ├── gui.py
+│   ├── theme.py
 │   ├── paths.py
 │   └── reminders.py
 ├── scripts/
