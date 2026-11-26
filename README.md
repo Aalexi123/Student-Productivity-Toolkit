@@ -5,6 +5,19 @@
 
 A desktop and command-line toolkit that automates everyday student admin: organise messy download folders, track assignments, generate a realistic study plan, analyse documents (with privacy masking) and report on study habits.
 
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/gui-dashboard-dark.png" alt="Dashboard (Dark Mode)" width="100%"/>
+      <br /><sub><b>Dark Mode Dashboard</b></sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/gui-dashboard-light.png" alt="Dashboard (Light Mode)" width="100%"/>
+      <br /><sub><b>Light Mode Dashboard</b></sub>
+    </td>
+  </tr>
+</table>
+
 ## Quick start
 
 ```bash
@@ -37,6 +50,19 @@ pip install -r requirements.txt   # includes customtkinter
 python src/main.py gui
 ```
 
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/study-planner.png" alt="Study Planner" width="100%"/>
+      <br /><sub><b>Automated Study Planner</b></sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/file-organiser.png" alt="Smart File Organiser" width="100%"/>
+      <br /><sub><b>Smart File Organiser</b></sub>
+    </td>
+  </tr>
+</table>
+
 The GUI calls the same functions as the menu and command line, so all three always behave the same.
 
 ## Command line
@@ -54,6 +80,8 @@ Run with no arguments for the interactive menu, or run one feature directly:
 | `python src/main.py gui` | Open the graphical interface |
 
 Add `--help` after any command for its options. Exit codes: 0 success, 1 failure, 2 bad usage.
+
+![Command Line Output](assets/screenshots/cli-output.png)
 
 ### Scheduling daily reminders
 
@@ -86,6 +114,19 @@ Cron usually can't show desktop notifications, so this writes the reminders to a
 | **Document Processor** | Extracts text from TXT, MD, PDF and DOCX; summarises CSVs with pandas. Reports word count, reading time and top terms. Best-effort masking of emails, phone numbers and secrets, with redaction counts in each report. Single file or whole folder. |
 | **Productivity Reports** | Planned vs actual study time by subject and week, with text and Matplotlib chart output. Log sessions from the menu. |
 | **Deadline Reminders** | The `\remind` command lists overdue and due-soon assignments. Schedule it daily, with optional desktop notifications. |
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/screenshots/planned-vs-actual.png" alt="Planned vs Actual Study Time" width="100%"/>
+      <br /><sub><b>Planned vs. Actual Study Time</b></sub>
+    </td>
+    <td align="center">
+      <img src="assets/screenshots/weekly-trend.png" alt="Weekly Study Trend" width="100%"/>
+      <br /><sub><b>Weekly Study Trend</b></sub>
+    </td>
+  </tr>
+</table>
 
 ## Data formats
 
@@ -137,7 +178,15 @@ student-productivity-toolkit/
 │   └── workflows/
 │       └── tests.yml
 ├── assets/
-│   └── logo.ico
+│   ├── logo.ico
+│   └── screenshots/
+│       ├── cli-output.png
+│       ├── file-organiser.png
+│       ├── gui-dashboard-dark.png
+│       ├── gui-dashboard-light.png
+│       ├── planned-vs-actual.png
+│       ├── study-planner.png
+│       └── weekly-trend.png
 ├── src/
 │   ├── main.py
 │   ├── file_organiser.py
